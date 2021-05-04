@@ -997,8 +997,10 @@ int uuu_wait_uuu_finish(const bool deamon, const bool dry)
 		uuu_register_notify_callback(notify_done, &exit);
 	}
 
-	if(polling_usb(exit))
+	if(!polling_usb(exit))
+	{
 		return -1;
+	}
 
 	return 0;
 }

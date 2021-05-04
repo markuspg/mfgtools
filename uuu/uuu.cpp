@@ -211,7 +211,7 @@ int print_udev_rule(const char * /*pro*/, const char * /*chip*/, const char * /*
 	return 0;
 }
 
-int polling_usb(std::atomic<int>& bexit);
+bool polling_usb(std::atomic<int>& bexit);
 
 int g_overall_status;
 int g_overall_okay;

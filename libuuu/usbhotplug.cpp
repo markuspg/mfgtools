@@ -215,7 +215,7 @@ void compare_list(libusb_device ** old, libusb_device **nw)
 	}
 }
 
-int polling_usb(std::atomic<int>& bexit)
+bool polling_usb(std::atomic<int>& bexit)
 {
 	libusb_device **oldlist = nullptr;
 	libusb_device **newlist = nullptr;
@@ -225,14 +225,16 @@ int polling_usb(std::atomic<int>& bexit)
 		if (libusb_init(nullptr) < 0)
 		{
 			set_last_err_string("Call libusb_init failure");
-			return -1;
+			return false;
 		}
 		g_libusb_init = true;
 		libusb_set_debug(nullptr, get_libusb_debug_level());
 	}
 
 	if (run_cmds("CFG:", nullptr))
-		return -1;
+	{
+		return false;
+	}
 
 	time_t start = time(0);
 
@@ -242,13 +244,15 @@ int polling_usb(std::atomic<int>& bexit)
 		if (sz < 0)
 		{
 			set_last_err_string("Call libusb_get_device_list failure");
-			return -1;
+			return false;
 		}
 
 		compare_list(oldlist, newlist);
 
 		if (oldlist)
+		{
 			libusb_free_device_list(oldlist, 1);
+		}
 
 		oldlist = newlist;
 
@@ -260,15 +264,17 @@ int polling_usb(std::atomic<int>& bexit)
 			if (difftime(time(0), start) >= g_wait_usb_timeout)
 			{
 				set_last_err_string("Timeout: Wait for Known USB Device");
-				return -1;
+				return false;
 			}
 		}
 	}
 
 	if(newlist)
+	{
 		libusb_free_device_list(newlist, 1);
+	}
 
-	return 0;
+	return true;
 }
 
 CmdUsbCtx::~CmdUsbCtx()
