@@ -530,12 +530,12 @@ shared_ptr<CmdBase> create_cmd_obj(const string &cmd)
 	return nullptr;
 }
 
-int uuu_run_cmd(const char * cmd, int dry)
+int uuu_run_cmd(const char * cmd, const bool dry)
 {
 	return run_cmd(nullptr, cmd, dry);
 }
 
-int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
+int run_cmd(CmdCtx *pCtx, const char * cmd, const bool dry)
 {
 	shared_ptr<CmdBase> p;
 	p = create_cmd_obj(cmd);
@@ -711,7 +711,7 @@ int CmdShell::run(CmdCtx*pCtx)
 			if (pos != string::npos)
 				cmd = cmd.substr(0, pos);
 
-			return run_cmd(pCtx, cmd.c_str(), 0);
+			return run_cmd(pCtx, cmd.c_str(), false);
 		}
 		uuu_notify nt;
 		nt.type = uuu_notify::NOTIFY_CMD_INFO;
@@ -914,7 +914,7 @@ int CmdIf::run(CmdCtx *p)
 
 int CmdEnv::run(CmdCtx *p)
 {
-	return run_cmd(p, m_unfold_cmd.c_str(), 0);
+	return run_cmd(p, m_unfold_cmd.c_str(), false);
 }
 
 int run_cmds(const char *protocol, CmdCtx *p)
@@ -1054,7 +1054,7 @@ int check_version(string str)
 	return 0;
 }
 
-int uuu_run_cmd_script(const char * buff, int /*dry*/)
+int uuu_run_cmd_script(const char * buff, const bool /*dry*/)
 {
 	shared_ptr<DataBuffer> p(new DataBuffer((void*)buff, strlen(buff)));
 	
@@ -1159,7 +1159,7 @@ int notify_done(uuu_notify nt, void *p)
 
 	return 0;
 }
-int uuu_wait_uuu_finish(const bool deamon, int dry)
+int uuu_wait_uuu_finish(const bool deamon, const bool dry)
 {
 	std::atomic<int> exit;
 	exit = 0;

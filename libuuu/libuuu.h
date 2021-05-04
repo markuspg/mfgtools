@@ -130,11 +130,11 @@ EXT int uuu_for_each_ls_file(uuu_ls_file fn, const char *path, void *p);
 typedef int(*uuu_ls_usb_devices)(const char *path, const char *chip, const char *pro,  uint16_t vid, uint16_t pid, uint16_t bcd, const char *serial_no, void *p);
 EXT int uuu_for_each_devices(uuu_ls_usb_devices fn, void *p);
 
-EXT int uuu_run_cmd(const char * cmd, int dry);
-EXT int uuu_run_cmd_script(const char *script, int dry);
+EXT int uuu_run_cmd(const char * cmd, bool dry);
+EXT int uuu_run_cmd_script(const char *script, bool dry);
 
 EXT int uuu_auto_detect_file(const char * filename);
-EXT int uuu_wait_uuu_finish(bool deamon, int dry);
+EXT int uuu_wait_uuu_finish(bool deamon, bool dry);
 EXT int uuu_add_usbpath_filter(const char *path);
 EXT int uuu_add_usbserial_no_filter(const char *serial_no);
 

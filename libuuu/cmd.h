@@ -214,7 +214,7 @@ public:
 };
 
 int run_cmds(const char *protocol, CmdCtx *p);
-int run_cmd(CmdCtx *pCtx, const char * cmd, int dry);
+int run_cmd(CmdCtx *pCtx, const char * cmd, bool dry);
 
 int insert_env_variable(const std::string &key, const std::string &value);
 std::string get_env_variable(std::string key);
