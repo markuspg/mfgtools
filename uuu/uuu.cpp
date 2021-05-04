@@ -29,6 +29,8 @@
 *
 */
 
+#include "autocomplete.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <thread>
@@ -49,6 +51,25 @@
 
 #include "../libuuu/libuuu.h"
 
+using namespace std;
+
+static string build_process_bar(size_t width, size_t pos, size_t total);
+static void clean_vt_color() noexcept;
+static void ctrl_c_handle(int);
+static bool enable_vt_mode();
+static int get_console_width();
+static void print_auto_scroll(string str, size_t len, size_t start);
+static int print_cfg(const char *pro, const char * chip, const char * /*compatible*/, uint16_t pid, uint16_t vid, uint16_t bcdmin, uint16_t bcdmax, void * /*p*/);
+static void print_help(bool detail = false);
+static void print_lsusb();
+static void print_oneline(string str);
+static void print_udev();
+static int print_udev_rule(const char * /*pro*/, const char * /*chip*/, const char * /*compatible*/,
+	uint16_t vid, uint16_t pid, uint16_t /*bcdmin*/, uint16_t /*bcdmax*/, void * /*p*/);
+static int print_usb_device(const char *path, const char *chip, const char *pro, uint16_t vid, uint16_t pid, uint16_t bcd, void * /*p*/);
+static void print_usb_filter();
+static void print_version();
+static int progress(uuu_notify nt, void *p);
 static int runshell(bool shell);
 
 const char * g_vt_yellow = "\x1B[93m";
@@ -60,7 +81,7 @@ const char * g_vt_boldwhite = "\x1B[97m";
 
 size_t g_max_process_width = 0;
 
-void clean_vt_color() noexcept
+static void clean_vt_color() noexcept
 {
 	g_vt_yellow = "";
 	g_vt_default = g_vt_yellow;
@@ -69,13 +90,6 @@ void clean_vt_color() noexcept
 	g_vt_kcyn = g_vt_yellow;
 	g_vt_boldwhite = g_vt_yellow;
 }
-
-using namespace std;
-
-int get_console_width();
-void print_oneline(string str);
-int auto_complete(int argc, char**argv);
-void print_autocomplete_help();
 
 char g_sample_cmd_list[] = {
 #include "uuu.clst"
@@ -96,7 +110,7 @@ public:
 	}
 };
 
-void ctrl_c_handle(int)
+static void ctrl_c_handle(int)
 {
 	do {
 		AutoCursor a;
@@ -175,7 +189,7 @@ int ask_passwd(char* prompt, char user[MAX_USER_LEN], char passwd[MAX_USER_LEN])
 	return 0;
 }
 
-void print_help(bool detail = false)
+static void print_help(bool detail)
 {
 	const char help[] =
 		"uuu [-d -m -v -V -bmap -no-bmap] <" "bootloader|cmdlists|cmd" ">\n\n"
@@ -243,12 +257,13 @@ void print_help(bool detail = false)
 		start = pos;
 	}
 }
-void print_version()
+
+static void print_version()
 {
 	printf("uuu (Universal Update Utility) for nxp imx chips -- %s\n\n", uuu_get_version_string());
 }
 
-int print_cfg(const char *pro, const char * chip, const char * /*compatible*/, uint16_t vid, uint16_t pid, uint16_t bcdmin, uint16_t bcdmax, void * /*p*/)
+static int print_cfg(const char *pro, const char * chip, const char * /*compatible*/, uint16_t vid, uint16_t pid, uint16_t bcdmin, uint16_t bcdmax, void * /*p*/)
 {
 	const char *ext;
 	if (strlen(chip) >= 7)
@@ -263,7 +278,7 @@ int print_cfg(const char *pro, const char * chip, const char * /*compatible*/, u
 	return 0;
 }
 
-int print_udev_rule(const char * /*pro*/, const char * /*chip*/, const char * /*compatible*/,
+static int print_udev_rule(const char * /*pro*/, const char * /*chip*/, const char * /*compatible*/,
 	uint16_t vid, uint16_t pid, uint16_t /*bcdmin*/, uint16_t /*bcdmax*/, void * /*p*/)
 {
 	printf("SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"%04x\", ATTRS{idProduct}==\"%04x\", TAG+=\"uaccess\"\n",
@@ -280,7 +295,7 @@ char g_wait[] = "|/-\\";
 int g_wait_index;
 
 
-string build_process_bar(size_t width, size_t pos, size_t total)
+static string build_process_bar(size_t width, size_t pos, size_t total)
 {
 	string str;
 	str.resize(width, ' ');
@@ -325,7 +340,7 @@ string build_process_bar(size_t width, size_t pos, size_t total)
 	return str;
 }
 
-void print_auto_scroll(string str, size_t len, size_t start)
+static void print_auto_scroll(string str, size_t len, size_t start)
 {
 	g_max_process_width = max(str.size(), g_max_process_width);
 	g_max_process_width = min(g_max_process_width, len);
@@ -598,7 +613,7 @@ return;
 static map<string, ShowNotify> g_map_path_nt;
 mutex g_callback_mutex;
 
-void print_oneline(string str)
+static void print_oneline(string str)
 {
 	size_t w = get_console_width();
 	if (w <= 3)
@@ -623,7 +638,7 @@ void print_oneline(string str)
 
 }
 
-ShowNotify Summary(map<uint64_t, ShowNotify> *np)
+static ShowNotify Summary(map<uint64_t, ShowNotify> *np)
 {
 	ShowNotify sn;
 	for (auto it = np->begin(); it != np->end(); it++)
@@ -648,7 +663,7 @@ ShowNotify Summary(map<uint64_t, ShowNotify> *np)
 	return sn;
 }
 
-int progress(uuu_notify nt, void *p)
+static int progress(uuu_notify nt, void *p)
 {
 	map<uint64_t, ShowNotify> *np = (map<uint64_t, ShowNotify>*)p;
 	map<string, ShowNotify>::iterator it;
@@ -723,7 +738,7 @@ int progress(uuu_notify nt, void *p)
 #include <stdlib.h>
 #include <stdio.h>
 
-bool enable_vt_mode()
+static bool enable_vt_mode()
 {
 	// Set output mode to handle virtual terminal sequences
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -749,7 +764,7 @@ bool enable_vt_mode()
 	return true;
 }
 
-int get_console_width()
+static int get_console_width()
 {
 	CONSOLE_SCREEN_BUFFER_INFO sbInfo;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbInfo);
@@ -757,15 +772,15 @@ int get_console_width()
 }
 #else
 #include <sys/ioctl.h>
-bool enable_vt_mode() { return true; }
-int get_console_width()
+static bool enable_vt_mode() { return true; }
+static int get_console_width()
 {
 	struct winsize w;
 	ioctl(0, TIOCGWINSZ, &w);
 	return w.ws_col;
 }
 #endif
-void print_usb_filter()
+static void print_usb_filter()
 {
 	if (!g_usb_path_filter.empty())
 	{
@@ -839,7 +854,7 @@ static int runshell(const bool shell)
 	return -1;
 }
 
-void print_udev()
+static void print_udev()
 {
 	uuu_for_each_cfg(print_udev_rule, NULL);
 	fprintf(stderr, "\n1: put above udev run into /etc/udev/rules.d/70-uuu.rules\n");
@@ -848,13 +863,13 @@ void print_udev()
 	fprintf(stderr, "\tsudo udevadm control --reload\n");
 }
 
-int print_usb_device(const char *path, const char *chip, const char *pro, uint16_t vid, uint16_t pid, uint16_t bcd, const char *serial_no, void * /*p*/)
+static int print_usb_device(const char *path, const char *chip, const char *pro, uint16_t vid, uint16_t pid, uint16_t bcd, const char *serial_no, void * /*p*/)
 {
 	printf("\t%s\t %s\t %s\t 0x%04X\t0x%04X\t 0x%04X\t %s\n", path, chip, pro, vid, pid, bcd, serial_no);
 	return 0;
 }
 
-void print_lsusb()
+static void print_lsusb()
 {
 	cout << "Connected Known USB Devices\n";
 	printf("\tPath\t Chip\t Pro\t Vid\t Pid\t BcdVersion\t Serial_no\n");
