@@ -134,7 +134,7 @@ EXT int uuu_run_cmd(const char * cmd, int dry);
 EXT int uuu_run_cmd_script(const char *script, int dry);
 
 EXT int uuu_auto_detect_file(const char * filename);
-EXT int uuu_wait_uuu_finish(int deamon, int dry);
+EXT int uuu_wait_uuu_finish(bool deamon, int dry);
 EXT int uuu_add_usbpath_filter(const char *path);
 EXT int uuu_add_usbserial_no_filter(const char *serial_no);
 

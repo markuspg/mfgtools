@@ -943,7 +943,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	int deamon = 0;
+	bool deamon = false;
 	int shell = 0;
 	string filename;
 	string cmd;
@@ -959,7 +959,7 @@ int main(int argc, char **argv)
 		{
 			if (s == "-d")
 			{
-				deamon = 1;
+				deamon = true;
 				uuu_set_small_mem(0);
 
 			}
