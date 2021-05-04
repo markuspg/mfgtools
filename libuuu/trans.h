@@ -115,4 +115,4 @@ private:
 	int m_timeout = 2000;
 };
 
-int polling_usb(std::atomic<int>& bexit);
+bool polling_usb(std::atomic<int>& bexit);

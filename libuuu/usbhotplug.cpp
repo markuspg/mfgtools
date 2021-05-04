@@ -477,10 +477,12 @@ static int check_usb_timeout(Timer& usb_timer)
 	return 0;
 }
 
-int polling_usb(std::atomic<int>& bexit)
+bool polling_usb(std::atomic<int>& bexit)
 {
 	if (run_cmds("CFG:", nullptr))
-		return -1;
+	{
+		return false;
+	}
 
 	Timer usb_timer;
 
@@ -491,7 +493,7 @@ int polling_usb(std::atomic<int>& bexit)
 		CAutoList newlist;
 		if (!newlist.good())
 		{
-			return -1;
+			return false;
 		}
 
 		compare_list(oldlist.list, newlist.list);
@@ -501,10 +503,10 @@ int polling_usb(std::atomic<int>& bexit)
 		this_thread::sleep_for(g_usb_poll_period.load());
 
 		if (check_usb_timeout(usb_timer))
-			return -1;
+			return false;
 	}
 
-	return 0;
+	return true;
 }
 
 CmdUsbCtx::~CmdUsbCtx()
