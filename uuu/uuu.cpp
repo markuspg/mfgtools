@@ -746,7 +746,7 @@ static int runshell(const bool shell)
 				if (uboot_cmd)
 					cmd = "fb: ucmd " + cmd;
 
-				int ret = uuu_run_cmd(cmd.c_str(), 0);
+				int ret = uuu_run_cmd(cmd.c_str(), false);
 				if (ret)
 					cout << uuu_get_last_err_string() << endl;
 				else
@@ -838,7 +838,7 @@ int main(int argc, char **argv)
 	string filename;
 	string cmd;
 	int ret;
-	int dryrun  = 0;
+	bool dryrun  = false;
 
 	string cmd_script;
 
@@ -865,7 +865,7 @@ int main(int argc, char **argv)
 				uuu_set_debug_level(2);
 			}else if (s == "-dry")
 			{
-				dryrun = 1;
+				dryrun = true;
 				g_verbose = 1;
 			}
 			else if (s == "-h")
