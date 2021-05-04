@@ -976,7 +976,7 @@ int notify_done(uuu_notify nt, void *p)
 
 	return 0;
 }
-int uuu_wait_uuu_finish(int deamon, int dry)
+int uuu_wait_uuu_finish(const bool deamon, int dry)
 {
 	std::atomic<int> exit;
 	exit = 0;
@@ -993,7 +993,9 @@ int uuu_wait_uuu_finish(int deamon, int dry)
 	}
 
 	if (!deamon)
+	{
 		uuu_register_notify_callback(notify_done, &exit);
+	}
 
 	if(polling_usb(exit))
 		return -1;

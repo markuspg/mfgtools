@@ -124,7 +124,7 @@ int uuu_run_cmd(const char * cmd, int dry);
 int uuu_run_cmd_script(const char *script, int dry);
 
 int uuu_auto_detect_file(const char * filename);
-int uuu_wait_uuu_finish(int deamon, int dry);
+int uuu_wait_uuu_finish(bool deamon, int dry);
 int uuu_add_usbpath_filter(const char *path);
 
 /*Set timeout wait for known devices appeared*/
