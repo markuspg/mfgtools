@@ -49,6 +49,8 @@
 
 #include "../libuuu/libuuu.h"
 
+static int runshell(bool shell);
+
 const char * g_vt_yellow = "\x1B[93m";
 const char * g_vt_default = "\x1B[0m";
 const char * g_vt_green = "\x1B[92m";
@@ -693,7 +695,7 @@ void print_usb_filter()
 	}
 }
 
-int runshell(int shell)
+static int runshell(const bool shell)
 {
 	int uboot_cmd = 0;
 	string prompt = "U>";
@@ -832,7 +834,7 @@ int main(int argc, char **argv)
 	}
 
 	bool deamon = false;
-	int shell = 0;
+	bool shell = false;
 	string filename;
 	string cmd;
 	int ret;
@@ -850,7 +852,7 @@ int main(int argc, char **argv)
 				deamon = true;
 			}else if (s == "-s")
 			{
-				shell = 1;
+				shell = true;
 				g_verbose = 1;
 			}
 			else if (s == "-v")
@@ -1019,7 +1021,9 @@ int main(int argc, char **argv)
 			printf("\n%sRun built-in script:%s\n %s\n\n", g_vt_boldwhite, g_vt_default, cmd_script.c_str());
 
 		if (!shell)
+		{
 			cout << "Wait for Known USB Device Appear...";
+		}
 
 		print_usb_filter();
 
