@@ -36,20 +36,20 @@
 
 #include "usbhotplug.h"
 
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <utility>
-#include <algorithm>
-#include <stdexcept>
-#include "libusb.h"
-#include "liberror.h"
-#include "config.h"
 #include "cmd.h"
+#include "config.h"
 #include "libcomm.h"
+#include "liberror.h"
 #include "libuuu.h"
-#include "vector"
-#include <time.h>
+
+#include <algorithm>
+#include <chrono>
+#include <mutex>
+#include <thread>
+
+#include "libusb.h"
+
+using namespace std;
 
 using chrono::milliseconds;
 using chrono::operator ""ms;
