@@ -38,7 +38,7 @@
 #include "liberror.h"
 #include "libuuu.h"
 #include "config.h"
-#include "trans.h"
+#include "usbhotplug.h"
 #include "sdps.h"
 #include <atomic>
 #include "buffer.h"

@@ -105,5 +105,3 @@ private:
 	EPInfo m_ep_out;
 	uint64_t m_timeout = 2000;
 };
-
-int polling_usb(std::atomic<int>& bexit);

@@ -29,6 +29,8 @@
 *
 */
 
+#include "../libuuu/usbhotplug.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <thread>
