@@ -45,6 +45,7 @@
 #include <algorithm>
 #include <chrono>
 #include <mutex>
+#include <set>
 #include <thread>
 
 #include "libusb.h"
@@ -83,27 +84,41 @@ public:
 	}
 };
 
-static struct {
-	vector<string> list;
-	mutex lock;
-
-	void push_back(string filter)
-	{
-		lock_guard<mutex> guard{lock};
-		list.emplace_back(move(filter));
+/**
+ * @brief Container for storing USB paths which shall be handled exclusively
+ */
+class USBPathFilters {
+public:
+	/**
+	 * @brief Add a new path to the ones which shall be handled exclusively
+	 * @param[in] path The path which shall be added
+	 * @return True if the path was added or false if it was already added
+	 */
+	bool add_path(string path) {
+		unique_lock<mutex> lock{mtx};
+		return filters.emplace(std::move(path)).second;
 	}
 
-	bool is_valid(const string& path)
-	{
-		lock_guard<mutex> guard{lock};
-		if (list.empty())
+	/**
+	 * @brief Query if the particular path belongs to the set of to be handled paths
+	 * @param[in] path The path which shall be queried for its membership
+	 * @return True if the path belongs to the set of the be handled paths, false otherwise
+	 */
+	bool is_valid(const string &path) {
+		unique_lock<mutex> lock{mtx};
+		if (filters.empty()) {
 			return true;
+		}
 
-		auto end = list.end();
-		auto pos = find(list.begin(), end, path);
-		return pos != end;
+		return filters.find(path) != filters.end();
 	}
-} g_filter_usbpath;
+
+private:
+	set<string> filters;
+	mutex mtx;
+};
+
+static USBPathFilters g_usb_path_filters;
 
 struct Timer
 {
@@ -252,7 +267,7 @@ static int usb_add(libusb_device *dev)
 
 	string str;
 	str = get_device_path(dev);
-	if (!g_filter_usbpath.is_valid(str))
+	if (!g_usb_path_filters.is_valid(str))
 		return -1;
 
 	ConfigItem *item = get_config()->find(desc.idVendor, desc.idProduct, desc.bcdDevice);
@@ -450,7 +465,7 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 			}
 			string str = get_device_path(dev);
 
-			if (!g_filter_usbpath.is_valid(str))
+			if (!g_usb_path_filters.is_valid(str))
 				continue;
 
 			ConfigItem *item = get_config()->find(desc.idVendor, desc.idProduct, desc.bcdDevice);
@@ -485,12 +500,22 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 	return -1;
 }
 
-int uuu_add_usbpath_filter(const char *path)
+/**
+ * @brief Add a particular USB path to the set of accepted USB paths
+ * @param[in] path The path which shall be added to the set of accepted USB paths
+ * @return 0 if the path was added, -1 if the path was already added
+ */
+int uuu_add_usbpath_filter(const char * const path)
 {
-	g_filter_usbpath.push_back(path);
-	return 0;
+	return g_usb_path_filters.add_path(path) ? 0 : -1;
 }
 
+/**
+ * @brief Execute a function on all USB devices attached to the system
+ * @param[in] fn The function to be executed
+ * @param[in] p Data which shall be passed to the function
+ * @return 0 on success, any other number on failure
+ */
 int uuu_for_each_devices(uuu_ls_usb_devices fn, void *p)
 {
 	if (ensure_libusb_initialized())
