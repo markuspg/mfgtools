@@ -34,6 +34,8 @@
  * Will polling devices list every 100ms
  */
 
+#include "usbhotplug.h"
+
 #include <thread>
 #include <atomic>
 #include <mutex>
@@ -277,7 +279,7 @@ static int usb_remove(libusb_device * /*dev*/)
 	return 0;
 }
 
-void compare_list(libusb_device ** old, libusb_device **nw)
+static void compare_list(libusb_device ** old, libusb_device **nw)
 {
 	libusb_device * dev;
 	int i = 0;
@@ -525,10 +527,9 @@ int uuu_for_each_devices(uuu_ls_usb_devices fn, void *p)
 	return 0;
 }
 
-int uuu_set_wait_timeout(int timeout_in_seconds)
+void uuu_set_wait_timeout(int timeout_in_seconds)
 {
 	g_wait_usb_timeout = seconds{timeout_in_seconds};
-	return 0;
 }
 
 void uuu_set_poll_period(int period_in_milliseconds)
@@ -536,8 +537,7 @@ void uuu_set_poll_period(int period_in_milliseconds)
 	g_usb_poll_period = milliseconds{period_in_milliseconds};
 }
 
-int uuu_set_wait_next_timeout(int timeout_in_seconds)
+void uuu_set_wait_next_timeout(int timeout_in_seconds)
 {
 	g_wait_next_usb_timeout = seconds{timeout_in_seconds};
-	return 0;
 }
