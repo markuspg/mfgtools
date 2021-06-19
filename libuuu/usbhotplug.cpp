@@ -70,6 +70,66 @@ enum KnownDeviceState {
 static atomic<KnownDeviceState> g_known_device_state{NoKnownDevice};
 
 /**
+ * @brief Container for querying and holding lists of all attached USB devices
+ */
+class USBDeviceListContainer {
+public:
+	~USBDeviceListContainer()
+	{
+		if (dev_list)
+		{
+			libusb_free_device_list(dev_list, 1);
+		}
+	}
+
+	USBDeviceListContainer& operator=(USBDeviceListContainer&& rhs)
+	{
+		if (dev_list)
+		{
+			libusb_free_device_list(dev_list, 1);
+		}
+		dev_list = rhs.dev_list;
+		rhs.dev_list = nullptr;
+
+		return *this;
+	}
+
+	/**
+	 * @brief Access the internally held list of attached USB devices
+	 * @return A pointer to the internally held list of attached USB devices
+	 */
+	libusb_device **data() const
+	{
+		return dev_list;
+	}
+	/**
+	 * @brief Update the internally held list of attached USB devices
+	 *
+	 * This invalidates the list held previously to the invocation of the
+	 * method.
+	 *
+	 * @return 0 if the device list could be updated, -1 otherwise
+	 */
+	int update()
+	{
+		if (dev_list)
+		{
+			libusb_free_device_list(dev_list, 1);
+		}
+		const auto res = libusb_get_device_list(nullptr, &dev_list);
+		if (res < 0)
+		{
+			dev_list = nullptr;
+			return -1;
+		}
+		return 0;
+	}
+
+private:
+	libusb_device ** dev_list = nullptr;
+};
+
+/**
  * @brief Container for storing USB paths which shall be handled exclusively
  */
 class USBPathFilters {
@@ -314,7 +374,9 @@ static int ensure_libusb_initialized()
 	try {
 		call_once(is_libusb_init, []{
 			if (libusb_init(nullptr) < 0)
+			{
 				throw runtime_error{"Call libusb_init failure"};
+			}
 			libusb_set_debug(nullptr, get_libusb_debug_level());
 		});
 	} catch(const exception& ex) {
@@ -326,41 +388,38 @@ static int ensure_libusb_initialized()
 
 int polling_usb(std::atomic<int>& bexit)
 {
-	libusb_device **oldlist = nullptr;
-	libusb_device **newlist = nullptr;
-
 	if (ensure_libusb_initialized())
+	{
 		return -1;
+	}
 
 	if (run_cmds("CFG:", nullptr))
+	{
 		return -1;
+	}
 
 	Timer usb_timer;
 
+	USBDeviceListContainer prev_devs;
 	while(!bexit)
 	{
-		ssize_t sz = libusb_get_device_list(nullptr, &newlist);
-		if (sz < 0)
+		USBDeviceListContainer curr_devs;
+		if (curr_devs.update())
 		{
 			set_last_err_string("Call libusb_get_device_list failure");
 			return -1;
 		}
 
-		compare_list(oldlist, newlist);
-
-		if (oldlist)
-			libusb_free_device_list(oldlist, 1);
-
-		oldlist = newlist;
+		compare_list(prev_devs.data(), curr_devs.data());
+		prev_devs = std::move(curr_devs);
 
 		this_thread::sleep_for(g_usb_poll_period.load());
 
 		if (check_usb_timeout(usb_timer))
+		{
 			return -1;
+		}
 	}
-
-	if(newlist)
-		libusb_free_device_list(newlist, 1);
 
 	return 0;
 }
