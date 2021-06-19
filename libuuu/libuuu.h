@@ -61,56 +61,6 @@ EXT const char * uuu_get_version_string();
 
 EXT int uuu_get_version();
 
-
-
-struct uuu_notify
-{
-	enum NOTIFY_TYPE
-	{
-		NOTIFY_CMD_TOTAL,
-		NOTIFY_CMD_START,	/* str is command name*/
-		NOTIFY_CMD_END,	    /* status show command finish status. 0 is success. Other failure.*/
-		NOTIFY_CMD_INDEX,   /*Current running command index*/
-
-		NOTIFY_CMD_INFO,	/* Status info string */
-
-		NOTIFY_PHASE_TOTAL,
-		NOTIFY_PHASE_INDEX, /*Current running phase*/
-
-		NOTIFY_TRANS_SIZE,  /*Total size*/
-		NOTIFY_TRANS_POS,   /*Current finished transfer pos*/
-
-		NOTIFY_WAIT_FOR,
-		NOFITY_DEV_ATTACH,
-
-		NOTIFY_DECOMPRESS_START,
-		NOTIFY_DECOMPRESS_SIZE,
-		NOTIFY_DECOMPRESS_POS, 
-
-		NOTIFY_DOWNLOAD_START,
-		NOTIFY_DOWNLOAD_END,
-		NOTIFY_THREAD_EXIT,
-
-		NOTIFY_DONE,
-	};
-
-	NOTIFY_TYPE type;
-	uint64_t id;
-	uint64_t timestamp;
-	union
-	{
-		int status;
-		size_t index;
-		size_t total;
-		char *str;
-	};
-};
-
-typedef int (*uuu_notify_fun)(struct uuu_notify, void *data);
-
-int uuu_register_notify_callback(uuu_notify_fun f, void *data);
-int uuu_unregister_notify_callback(uuu_notify_fun f);
-
 typedef int(*uuu_show_cfg)(const char *pro, const char *chip, const char *comp, uint16_t vid, uint16_t pid, uint16_t bcdlow, uint16_t bcdhigh, void *p);
 int uuu_for_each_cfg(uuu_show_cfg fn, void *p);
 

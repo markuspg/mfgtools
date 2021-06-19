@@ -33,6 +33,7 @@
  Android fastboot protocol define at
  https://android.googlesource.com/platform/system/core/+/master/fastboot/
 */
+#include "notify.h"
 #include <string.h>
 #include "fastboot.h"
 #include "libcomm.h"

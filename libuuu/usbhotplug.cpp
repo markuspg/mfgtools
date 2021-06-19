@@ -40,7 +40,7 @@
 #include "config.h"
 #include "libcomm.h"
 #include "liberror.h"
-#include "libuuu.h"
+#include "notify.h"
 
 #include <algorithm>
 #include <chrono>
