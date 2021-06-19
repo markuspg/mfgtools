@@ -29,6 +29,7 @@
 *
 */
 
+#include "notify.h"
 #include <map>
 #include "buffer.h"
 #include <sys/stat.h>

@@ -28,6 +28,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 *
 */
+#include "notify.h"
 #include <string.h>
 #include <iostream>
 #include <fstream>

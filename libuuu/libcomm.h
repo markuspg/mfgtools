@@ -36,8 +36,6 @@
 
 using namespace std;
 
-void call_notify(struct uuu_notify nf);
-
 #define log printf
 #define dbg printf
 

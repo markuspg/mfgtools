@@ -29,6 +29,7 @@
 *
 */
 
+#include "../libuuu/notify.h"
 #include "../libuuu/usbhotplug.h"
 
 #include <iostream>

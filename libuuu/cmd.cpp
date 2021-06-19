@@ -29,6 +29,7 @@
 *
 */
 
+#include "notify.h"
 #include <regex>
 #include <iterator>
 #include <memory>
