@@ -46,6 +46,13 @@ static mutex g_mutex_notify;
 using namespace std::chrono;
 static const time_point<steady_clock> g_now = steady_clock::now();
 
+/**
+ * @brief Register a new callback function which shall be called upon a
+ * notification
+ * @param[in] f The function which shall be called upon a notification
+ * @param[in] data Pointer to data which shall be passed to the callback method
+ * @return `0` if the callback function got registered, `1` if it already is
+ */
 int uuu_register_notify_callback(uuu_notify_fun f, void *data)
 {
 	std::lock_guard<mutex> lock(g_mutex_notify);
@@ -53,6 +60,12 @@ int uuu_register_notify_callback(uuu_notify_fun f, void *data)
 	return g_notification_map.emplace(f, data).second ? 0 : 1;
 }
 
+/**
+ * @brief Unregister a callback function
+ * @param[in] f The function which shall not be called upon a notification
+ * anymore
+ * @return `0` if it got removed, `1` otherwise
+ */
 int uuu_unregister_notify_callback(uuu_notify_fun f)
 {
 	std::lock_guard<mutex> lock(g_mutex_notify);
@@ -60,6 +73,10 @@ int uuu_unregister_notify_callback(uuu_notify_fun f)
 	return g_notification_map.erase(f) > 0 ? 0 : 1;
 }
 
+/**
+ * @brief Submit a notification to all registered callbacks
+ * @param[in] nf The notification which shall be submitted to the callbacks
+ */
 void call_notify(struct uuu_notify nf)
 {
 	//Change RW lock later;

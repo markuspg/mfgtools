@@ -225,7 +225,7 @@ static int run_usb_cmds(ConfigItem *item, libusb_device *dev)
 {
 	int ret;
 	uuu_notify nt;
-	nt.type = uuu_notify::NOFITY_DEV_ATTACH;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH;
 
 	string str;
 	str = get_device_path(dev);
@@ -245,7 +245,7 @@ static int run_usb_cmds(ConfigItem *item, libusb_device *dev)
 	if (libusb_open(dev, (libusb_device_handle **)&(ctx.m_dev)) < 0)
 	{
 		set_last_err_string("Failure open usb device" TRY_SUDO);
-		nt.type = uuu_notify::NOTIFY_CMD_END;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
 		nt.status = -1;
 		call_notify(nt);
 		libusb_free_device_list(list, 1);
@@ -257,7 +257,7 @@ static int run_usb_cmds(ConfigItem *item, libusb_device *dev)
 
 	libusb_free_device_list(list, 1);
 
-	nt.type = uuu_notify::NOTIFY_THREAD_EXIT;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::THREAD_EXIT;
 	call_notify(nt);
 
 	return ret;
@@ -467,7 +467,7 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 			if (item && item->m_protocol == str_to_upper(pro))
 				{
 					uuu_notify nt;
-					nt.type = uuu_notify::NOFITY_DEV_ATTACH;
+					nt.type = uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH;
 					m_config_item = item;
 
 					/* work around windows open device failure 1/10
@@ -497,7 +497,7 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 		this_thread::sleep_for(200ms);
 
 		uuu_notify nt;
-		nt.type = nt.NOTIFY_WAIT_FOR;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::WAIT_FOR;
 		nt.str = (char*)"Wait for Known USB";
 		call_notify(nt);
 
