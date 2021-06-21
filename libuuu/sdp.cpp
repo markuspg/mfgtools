@@ -723,7 +723,7 @@ int SDPBootlogCmd::run(CmdCtx *ctx)
 	v[0] = 'I';
 
 	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFY_CMD_INFO;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
 	
 	int ret;
 	while (1)

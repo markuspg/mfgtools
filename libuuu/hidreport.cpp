@@ -40,13 +40,13 @@ HIDReport::~HIDReport()
 {
 }
 
-void HIDReport::notify(size_t index, uuu_notify::NOTIFY_TYPE type)
+void HIDReport::notify(size_t index, uuu_notify::NOTIFCTN_TYPE type)
 {
 	uuu_notify nf;
 	nf.type = type;
-	if(type == uuu_notify::NOTIFY_TRANS_POS)
+	if(type == uuu_notify::NOTIFCTN_TYPE::TRANS_POS)
 		nf.index = index + m_postion_base;
-	if (type == uuu_notify::NOTIFY_TRANS_SIZE)
+	if (type == uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE)
 	{
 		nf.index = m_notify_total > index ? m_notify_total : index;
 	}
@@ -68,7 +68,7 @@ int HIDReport::read(std::vector<uint8_t> &buff)
 
 int HIDReport::write(const void *p, size_t sz, uint8_t report_id)
 {
-	notify(sz, uuu_notify::NOTIFY_TRANS_SIZE);
+	notify(sz, uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE);
 
 	const uint8_t * const buff = reinterpret_cast<const uint8_t *>(p);
 	size_t off = 0;
@@ -89,10 +89,10 @@ int HIDReport::write(const void *p, size_t sz, uint8_t report_id)
 
 		if (off % 0x1F == 0)
 		{
-			notify(off, uuu_notify::NOTIFY_TRANS_POS);
+			notify(off, uuu_notify::NOTIFCTN_TYPE::TRANS_POS);
 		}
 	}
 
-	notify(sz, uuu_notify::NOTIFY_TRANS_POS);
+	notify(sz, uuu_notify::NOTIFCTN_TYPE::TRANS_POS);
 	return 0;
 }

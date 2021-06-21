@@ -35,39 +35,72 @@
 #include <cstddef>
 #include <cstdint>
 
+/**
+ * @brief Data structure for storing information that shall be sent as
+ * notification to all registered subscribers
+ */
 struct uuu_notify
 {
-	enum NOTIFY_TYPE
+	enum class NOTIFCTN_TYPE : uint_fast8_t
 	{
-		NOTIFY_CMD_TOTAL,
-		NOTIFY_CMD_START,	/* str is command name*/
-		NOTIFY_CMD_END,	    /* status show command finish status. 0 is success. Other failure.*/
-		NOTIFY_CMD_INDEX,   /*Current running command index*/
+		//! The total number of commands being executed (`total` is set to the
+		//! number of commands)
+		CMD_TOTAL,
+		//! A command started execution (`str` is set to the command's name)
+		CMD_START,
+		//! Command execution ended (`status` is set to `0` on success, any
+		//! other value on failure)
+		CMD_END,
+		//! Index of a command in a command list about to be executed (`index`
+		//! is set accordingly)
+		CMD_INDEX,
 
-		NOTIFY_CMD_INFO,	/* Status info string */
+		//! Textual information from a command (`str` contains the information)
+		CMD_INFO,
 
-		NOTIFY_PHASE_TOTAL,
-		NOTIFY_PHASE_INDEX, /*Current running phase*/
+		//! Unused
+		PHASE_TOTAL,
+		//! Unused
+		PHASE_INDEX,
 
-		NOTIFY_TRANS_SIZE,  /*Total size*/
-		NOTIFY_TRANS_POS,   /*Current finished transfer pos*/
+		//! The entire size of a transfer (`total` is set to the total size)
+		TRANS_SIZE,
+		//! The current offset/progress of the transfer (`index` or `total` are
+		//! set to the current progress)
+		TRANS_POS,
 
-		NOTIFY_WAIT_FOR,
-		NOFITY_DEV_ATTACH,
+		//! A USB device is being waited for (`str` is set to a descriptive
+		//! message)
+		WAIT_FOR,
+		//! A USB device has been attached (`str` contains the device's path)
+		DEV_ATTACH,
 
-		NOTIFY_DECOMPRESS_START,
-		NOTIFY_DECOMPRESS_SIZE,
-		NOTIFY_DECOMPRESS_POS,
+		//! Decompression of a file started (`str` is set to the compressed
+		//! file's name)
+		DECOMPRESS_START,
+		//! Size of the file being decompressed (`total` is set to the size)
+		DECOMPRESS_SIZE,
+		//! The position in the file being decompressed (`index` is set to the
+		//! position)
+		DECOMPRESS_POS,
 
-		NOTIFY_DOWNLOAD_START,
-		NOTIFY_DOWNLOAD_END,
-		NOTIFY_THREAD_EXIT,
+		//! A HTTP download started (`str` is set to the host)
+		DOWNLOAD_START,
+		//! A HTTP download ended (`str` is set to the host)
+		DOWNLOAD_END,
+		//! A thread for the execution of USB commands exited (nothing is set)
+		THREAD_EXIT,
 
-		NOTIFY_DONE,
+		//! The _Done_ command runs (`nothing` is set)
+		DONE,
 	};
 
-	NOTIFY_TYPE type;
+	//! The type of the notification
+	NOTIFCTN_TYPE type;
+	//! The id of the thread sending the notification
 	uint64_t id;
+	//! Timestamp of the notification submission time (mostly concides with its
+	//! creation time)
 	uint64_t timestamp;
 	union
 	{
@@ -78,7 +111,12 @@ struct uuu_notify
 	};
 };
 
-using uuu_notify_fun = int (*)(struct uuu_notify, void *data);
+/**
+ * @brief Method which is to be called upon notifications
+ * @param[in] notifctn The notification which got send
+ * @param[in] data Optional additional data
+ */
+using uuu_notify_fun = int (*)(struct uuu_notify notifctn, void *data);
 void call_notify(struct uuu_notify nf);
 int uuu_register_notify_callback(uuu_notify_fun f, void *data);
 int uuu_unregister_notify_callback(uuu_notify_fun f);

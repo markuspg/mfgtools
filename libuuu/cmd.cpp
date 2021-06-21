@@ -234,7 +234,7 @@ int CmdBase::parser_protocal(char *p, size_t &pos)
 int CmdBase::dump()
 {
 	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFY_CMD_INFO;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
 
 	string str =  m_cmd;
 	str += "\n";
@@ -250,7 +250,7 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 	int ret;
 
 	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFY_CMD_TOTAL;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_TOTAL;
 	nt.total = size();
 	call_notify(nt);
 
@@ -260,11 +260,11 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 	{
 		uuu_notify nt;
 
-		nt.type = uuu_notify::NOTIFY_CMD_INDEX;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INDEX;
 		nt.index = i;
 		call_notify(nt);
 
-		nt.type = uuu_notify::NOTIFY_CMD_START;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_START;
 		nt.str = (char *)(*it)->get_cmd().c_str();
 		call_notify(nt);
 
@@ -273,7 +273,7 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 		else
 			ret = (*it)->run(p);
 
-		nt.type = uuu_notify::NOTIFY_CMD_END;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
 		nt.status = ret;
 		call_notify(nt);
 		if (ret)
@@ -533,11 +533,11 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 		return -1;
 
 	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFY_CMD_TOTAL;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_TOTAL;
 	nt.total = 1;
 	call_notify(nt);
 
-	nt.type = uuu_notify::NOTIFY_CMD_START;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_START;
 	nt.str = (char *)p->get_cmd().c_str();
 	call_notify(nt);
 
@@ -578,7 +578,7 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 		return ret = dry? p->dump() : p->run(nullptr);
 	}
 
-	nt.type = uuu_notify::NOTIFY_CMD_END;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
 	nt.status = ret;
 	call_notify(nt);
 
@@ -588,7 +588,7 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 int CmdDone::run(CmdCtx *)
 {
 	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFY_DONE;
+	nt.type = uuu_notify::NOTIFCTN_TYPE::DONE;
 	call_notify(nt);
 	return 0;
 }
@@ -702,7 +702,7 @@ int CmdShell::run(CmdCtx*pCtx)
 			return run_cmd(pCtx, cmd.c_str(), 0);
 		}
 		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFY_CMD_INFO;
+		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
 		nt.str = (char*)str.c_str();
 		call_notify(nt);
 	}
@@ -1127,9 +1127,9 @@ int uuu_auto_detect_file(const char *filename)
 
 int notify_done(uuu_notify nt, void *p)
 {
-	if(nt.type == uuu_notify::NOTIFY_DONE)
+	if(nt.type == uuu_notify::NOTIFCTN_TYPE::DONE)
 		*(std::atomic<int> *) p = 1;
-	if (nt.type == uuu_notify::NOTIFY_CMD_END && nt.status)
+	if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_END && nt.status)
 		*(std::atomic<int> *) p = 1;
 
 	return 0;

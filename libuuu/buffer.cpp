@@ -291,11 +291,11 @@ int http_load(shared_ptr<HttpStream> http, shared_ptr<FileBuffer> p, string file
 	size_t max = 0x10000;
 
 	uuu_notify ut;
-	ut.type = uuu_notify::NOTIFY_DOWNLOAD_START;
+	ut.type = uuu_notify::NOTIFCTN_TYPE::DOWNLOAD_START;
 	ut.str = (char*)filename.c_str();
 	call_notify(ut);
 
-	ut.type = uuu_notify::NOTIFY_TRANS_SIZE;
+	ut.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
 	ut.total = p->size();
 	call_notify(ut);
 
@@ -313,7 +313,7 @@ int http_load(shared_ptr<HttpStream> http, shared_ptr<FileBuffer> p, string file
 		p->m_avaible_size = i + sz;
 		p->m_request_cv.notify_all();
 
-		ut.type = uuu_notify::NOTIFY_TRANS_POS;
+		ut.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
 		ut.total = i + sz;
 		call_notify(ut);
 	}
@@ -321,7 +321,7 @@ int http_load(shared_ptr<HttpStream> http, shared_ptr<FileBuffer> p, string file
 	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_LOADED);
 	p->m_request_cv.notify_all();
 
-	ut.type = uuu_notify::NOTIFY_DOWNLOAD_END;
+	ut.type = uuu_notify::NOTIFCTN_TYPE::DOWNLOAD_END;
 	ut.str = (char*)filename.c_str();
 	call_notify(ut);
 	return 0;
@@ -1111,11 +1111,11 @@ int FSGz::load(const string &backfile, const string &filename, shared_ptr<FileBu
 			sz = p->size();
 
 		uuu_notify ut;
-		ut.type = uuu_notify::NOTIFY_DECOMPRESS_START;
+		ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_START;
 		ut.str = (char*)backfile.c_str();
 		call_notify(ut);
 
-		ut.type = uuu_notify::NOTIFY_DECOMPRESS_SIZE;
+		ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_SIZE;
 		ut.total = pb->size();
 		call_notify(ut);
 
@@ -1131,7 +1131,7 @@ int FSGz::load(const string &backfile, const string &filename, shared_ptr<FileBu
 			cur += ret;
 			p->reserve(cur + sz);
 
-			ut.type = uuu_notify::NOTIFY_DECOMPRESS_POS;
+			ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS;
 			ut.index = gzoffset(fp);
 			call_notify(ut);
 		}
@@ -1139,7 +1139,7 @@ int FSGz::load(const string &backfile, const string &filename, shared_ptr<FileBu
 		p->resize(cur);
 		p->m_avaible_size = cur;
 
-		ut.type = uuu_notify::NOTIFY_DECOMPRESS_POS;
+		ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS;
 		ut.index = pb->size();
 		call_notify(ut);
 

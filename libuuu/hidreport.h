@@ -46,7 +46,7 @@ public:
 	virtual ~HIDReport();
 
 	size_t get_out_package_size() noexcept { return m_size_out; }
-	virtual void notify(size_t index, uuu_notify::NOTIFY_TYPE type);
+	virtual void notify(size_t index, uuu_notify::NOTIFCTN_TYPE type);
 	int read(std::vector<uint8_t> &buff);
 	void set_notify_total(size_t notify_total) noexcept { m_notify_total = notify_total; }
 	void set_out_package_size(size_t sz)
