@@ -68,7 +68,7 @@ set(SOURCES
 	${CLSTS}
 )
 
-add_executable(uuu ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(uuu uuc_s ${OPENSSL_LIBRARIES} ${LIBUSB_LIBRARIES} ${LIBZ_LIBRARIES} dl bz2)
 
 install(TARGETS uuu DESTINATION bin)

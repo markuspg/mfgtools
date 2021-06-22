@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(uuu)
+project(uuu
+	DESCRIPTION "Freescale/NXP I.MX Chip image deploy tools."
+	HOMEPAGE_URL "https://github.com/NXPmicro/mfgtools.git"
+	LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
