@@ -51,6 +51,7 @@
 #include "libusb.h"
 
 using namespace std;
+using namespace uuu;
 
 using chrono::milliseconds;
 using chrono::operator ""ms;
@@ -285,8 +286,8 @@ static int open_libusb(libusb_device *dev, void **usb_device_handle)
 static int run_usb_cmds(ConfigItem *item, libusb_device *dev, short bcddevice)
 {
 	int ret;
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::DEV_ATTACH;
 
 	string str;
 	str = get_device_path(dev);
@@ -299,7 +300,7 @@ static int run_usb_cmds(ConfigItem *item, libusb_device *dev, short bcddevice)
 
 	if (ret = open_libusb(dev, &(ctx.m_dev)))
 	{
-		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
+		nt.type = Notification::NOTIFCTN_TYPE::CMD_END;
 		nt.status = -1;
 		call_notify(nt);
 		return ret;
@@ -308,7 +309,7 @@ static int run_usb_cmds(ConfigItem *item, libusb_device *dev, short bcddevice)
 	ret = run_cmds(item->m_protocol.c_str(), &ctx);
 	g_known_device_state = KnownDeviceDone;
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::THREAD_EXIT;
+	nt.type = Notification::NOTIFCTN_TYPE::THREAD_EXIT;
 	call_notify(nt);
 
 	libusb_unref_device(dev); //ref_device when start thread
@@ -529,8 +530,8 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 			ConfigItem *item = get_config()->find(desc.idVendor, desc.idProduct, desc.bcdDevice);
 			if (item && item->m_protocol == str_to_upper(pro))
 				{
-					uuu_notify nt;
-					nt.type = uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH;
+					Notification nt;
+					nt.type = Notification::NOTIFCTN_TYPE::DEV_ATTACH;
 					m_config_item = item;
 					m_current_bcd = desc.bcdDevice;
 
@@ -547,8 +548,8 @@ int CmdUsbCtx::look_for_match_device(const char *pro)
 
 		this_thread::sleep_for(200ms);
 
-		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFCTN_TYPE::WAIT_FOR;
+		Notification nt;
+		nt.type = Notification::NOTIFCTN_TYPE::WAIT_FOR;
 		nt.str = (char*)"Wait for Known USB";
 		call_notify(nt);
 

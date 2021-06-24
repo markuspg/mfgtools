@@ -42,6 +42,8 @@
 
 #include <cstring>
 
+using namespace uuu;
+
 int SDPCmdBase::check_ack(HIDReport *report, uint32_t ack)
 {
 	if (get_hab_type(report) == HabUnknown)
@@ -722,8 +724,8 @@ int SDPBootlogCmd::run(CmdCtx *ctx)
 	vector<uint8_t> v(65);
 	v[0] = 'I';
 
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_INFO;
 	
 	int ret;
 	while (1)

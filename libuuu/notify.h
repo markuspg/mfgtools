@@ -35,12 +35,15 @@
 #include <cstddef>
 #include <cstdint>
 
+namespace uuu {
+
 /**
  * @brief Data structure for storing information that shall be sent as
  * notification to all registered subscribers
  */
-struct uuu_notify
+class Notification
 {
+public:
 	enum class NOTIFCTN_TYPE : uint_fast8_t
 	{
 		//! The total number of commands being executed (`total` is set to the
@@ -116,7 +119,9 @@ struct uuu_notify
  * @param[in] notifctn The notification which got send
  * @param[in] data Optional additional data
  */
-using uuu_notify_fun = int (*)(struct uuu_notify notifctn, void *data);
-void call_notify(struct uuu_notify nf);
-int uuu_register_notify_callback(uuu_notify_fun f, void *data);
-int uuu_unregister_notify_callback(uuu_notify_fun f);
+using uuu_notify_fun = int (*)(Notification notifctn, void *data);
+void call_notify(Notification nf);
+int register_notify_callback(uuu_notify_fun f, void *data);
+int unregister_notify_callback(uuu_notify_fun f);
+
+}; // namespace uuu

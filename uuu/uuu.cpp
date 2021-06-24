@@ -52,6 +52,8 @@
 
 #include "../libuuu/libuuu.h"
 
+using namespace uuu;
+
 const char * g_vt_yellow = "\x1B[93m";
 const char * g_vt_default = "\x1B[0m";
 const char * g_vt_green = "\x1B[92m";
@@ -307,54 +309,54 @@ public:
 
 	ShowNotify() : m_start_time{clock()} {}
 
-	bool update(uuu_notify nt)
+	bool update(Notification nt)
 	{
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH)
+		if (nt.type == Notification::NOTIFCTN_TYPE::DEV_ATTACH)
 		{
 			m_dev = nt.str;
 			m_done = 0;
 			m_status = 0;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_START)
+		if (nt.type == Notification::NOTIFCTN_TYPE::CMD_START)
 		{
 			m_start_pos = 0;
 			m_cmd = nt.str;
 			m_cmd_start_time = nt.timestamp;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_START)
-		{
-			m_start_pos = 0;
-			m_cmd = nt.str;
-			m_cmd_start_time = nt.timestamp;
-			m_dev = "Prep";
-		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::DOWNLOAD_START)
+		if (nt.type == Notification::NOTIFCTN_TYPE::DECOMPRESS_START)
 		{
 			m_start_pos = 0;
 			m_cmd = nt.str;
 			m_cmd_start_time = nt.timestamp;
 			m_dev = "Prep";
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::DOWNLOAD_END)
+		if (nt.type == Notification::NOTIFCTN_TYPE::DOWNLOAD_START)
+		{
+			m_start_pos = 0;
+			m_cmd = nt.str;
+			m_cmd_start_time = nt.timestamp;
+			m_dev = "Prep";
+		}
+		if (nt.type == Notification::NOTIFCTN_TYPE::DOWNLOAD_END)
 		{
 			m_IsEmptyLine = true;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE || nt.type == uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_SIZE)
+		if (nt.type == Notification::NOTIFCTN_TYPE::TRANS_SIZE || nt.type == Notification::NOTIFCTN_TYPE::DECOMPRESS_SIZE)
 		{
 			m_trans_size = nt.total;
 			return false;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_TOTAL)
+		if (nt.type == Notification::NOTIFCTN_TYPE::CMD_TOTAL)
 		{
 			m_cmd_total = nt.total;
 			return false;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_INDEX)
+		if (nt.type == Notification::NOTIFCTN_TYPE::CMD_INDEX)
 		{
 			m_cmd_index = nt.index;
 			return false;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::DONE)
+		if (nt.type == Notification::NOTIFCTN_TYPE::DONE)
 		{
 			if (m_status)
 				g_overall_failure++;
@@ -363,7 +365,7 @@ public:
 
 			m_done = 1;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_END)
+		if (nt.type == Notification::NOTIFCTN_TYPE::CMD_END)
 		{
 			m_cmd_end_time = nt.timestamp;
 			if(nt.status)
@@ -375,7 +377,7 @@ public:
 			if (m_status)
 				g_overall_failure++;
 		}
-		if (nt.type == uuu_notify::NOTIFCTN_TYPE::TRANS_POS || nt.type == uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS)
+		if (nt.type == Notification::NOTIFCTN_TYPE::TRANS_POS || nt.type == Notification::NOTIFCTN_TYPE::DECOMPRESS_POS)
 		{
 			if (m_trans_size == 0) {
 
@@ -392,20 +394,20 @@ public:
 
 		return true;
 	}
-	void print_verbose(uuu_notify*nt)
+	void print_verbose(Notification*nt)
 	{
 		if (this->m_dev == "Prep" && g_start_usb_transfer)
 			return;
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::DEV_ATTACH)
+		if (nt->type == Notification::NOTIFCTN_TYPE::DEV_ATTACH)
 		{
 			cout << "New USB Device Attached at " << nt->str << endl;
 		}
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::CMD_START)
+		if (nt->type == Notification::NOTIFCTN_TYPE::CMD_START)
 		{
 			cout << m_dev << ">" << "Start Cmd:" << nt->str << endl;
 		}
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::CMD_END)
+		if (nt->type == Notification::NOTIFCTN_TYPE::CMD_END)
 		{
 			double diff = m_cmd_end_time - m_cmd_start_time;
 			diff /= 1000;
@@ -419,7 +421,7 @@ public:
 			}
 		}
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::TRANS_POS || nt->type == uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS)
+		if (nt->type == Notification::NOTIFCTN_TYPE::TRANS_POS || nt->type == Notification::NOTIFCTN_TYPE::DECOMPRESS_POS)
 		{
 			if (m_trans_size)
 				cout << g_vt_yellow << "\r" << m_trans_pos * 100 / m_trans_size <<"%" << g_vt_default;
@@ -429,20 +431,20 @@ public:
 			cout.flush();
 		}
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::CMD_INFO)
+		if (nt->type == Notification::NOTIFCTN_TYPE::CMD_INFO)
 			cout << nt->str;
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::WAIT_FOR)
+		if (nt->type == Notification::NOTIFCTN_TYPE::WAIT_FOR)
 			cout << "\r" << nt->str << " "<< g_wait[((g_wait_index++) & 0x3)];
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_START)
+		if (nt->type == Notification::NOTIFCTN_TYPE::DECOMPRESS_START)
 			cout << "Decompress file:" << nt->str << endl;
 
-		if (nt->type == uuu_notify::NOTIFCTN_TYPE::DOWNLOAD_START)
+		if (nt->type == Notification::NOTIFCTN_TYPE::DOWNLOAD_START)
 			cout << "Download file:" << nt->str << endl;
 
 	}
-	void print(int verbose = 0, uuu_notify*nt=NULL)
+	void print(int verbose = 0, Notification*nt=NULL)
 	{
 		verbose ? print_verbose(nt) : print_simple();
 	}
@@ -579,7 +581,7 @@ ShowNotify Summary(map<uint64_t, ShowNotify> *np)
 	return sn;
 }
 
-int progress(uuu_notify nt, void *p)
+int progress(Notification nt, void *p)
 {
 	map<uint64_t, ShowNotify> *np = (map<uint64_t, ShowNotify>*)p;
 	map<string, ShowNotify>::iterator it;
@@ -633,7 +635,7 @@ int progress(uuu_notify nt, void *p)
 		//(*np)[nt.id] = g_map_path_nt[(*np)[nt.id].m_dev];
 	}
 
-	if (nt.type == uuu_notify::NOTIFCTN_TYPE::THREAD_EXIT)
+	if (nt.type == Notification::NOTIFCTN_TYPE::THREAD_EXIT)
 	{
 		if(np->find(nt.id) != np->end())
 			np->erase(nt.id);
@@ -1080,7 +1082,7 @@ int main(int argc, char **argv)
 
 	map<uint64_t, ShowNotify> nt_session;
 
-	uuu_register_notify_callback(progress, &nt_session);
+	register_notify_callback(progress, &nt_session);
 
 
 	if (!cmd.empty())
