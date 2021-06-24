@@ -29,23 +29,11 @@
 *
 */
 
-#include <iostream>
-#include <stdio.h>
-#include <thread>
-#include <atomic>
-#include <iomanip>
-#include <map>
-#include <mutex>
-#include <vector>
-#include <sstream>
-#include <fstream>
-#include <stdarg.h>
-#include <time.h>
-#include <string.h>
-#include <signal.h>
+#include "autocomplete.h"
 #include "buildincmd.h"
-
 #include "../libuuu/libuuu.h"
+
+#include <iostream>
 
 #ifndef _MSC_VER
 #include <unistd.h>
