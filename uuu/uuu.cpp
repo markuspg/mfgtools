@@ -29,6 +29,7 @@
 *
 */
 
+#include "autocomplete.h"
 #include "../libuuu/notify.h"
 #include "../libuuu/usbhotplug.h"
 
@@ -75,8 +76,6 @@ using namespace std;
 
 int get_console_width();
 void print_oneline(string str);
-int auto_complete(int argc, char**argv);
-void print_autocomplete_help();
 
 char g_sample_cmd_list[] = {
 #include "uuu.clst"
