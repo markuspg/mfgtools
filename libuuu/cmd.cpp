@@ -51,6 +51,8 @@
 #include <stdio.h>  
 #include <stdlib.h>  
 
+using namespace uuu;
+
 static CmdMap g_cmd_map;
 static CmdObjCreateMap g_cmd_create_map;
 static string g_cmd_list_file;
@@ -210,8 +212,8 @@ int CmdBase::parser_protocal(char *p, size_t &pos)
 
 int CmdBase::dump()
 {
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_INFO;
 
 	string str =  m_cmd;
 	str += "\n";
@@ -226,8 +228,8 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 	CmdList::iterator it;
 	int ret;
 
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_TOTAL;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_TOTAL;
 	nt.total = size();
 	call_notify(nt);
 
@@ -235,13 +237,13 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 
 	for (it = begin(); it != end(); it++, i++)
 	{
-		uuu_notify nt;
+		Notification nt;
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INDEX;
+		nt.type = Notification::NOTIFCTN_TYPE::CMD_INDEX;
 		nt.index = i;
 		call_notify(nt);
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_START;
+		nt.type = Notification::NOTIFCTN_TYPE::CMD_START;
 		nt.str = (char *)(*it)->get_cmd().c_str();
 		call_notify(nt);
 
@@ -250,7 +252,7 @@ int CmdList::run_all(CmdCtx *p, bool dry)
 		else
 			ret = (*it)->run(p);
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
+		nt.type = Notification::NOTIFCTN_TYPE::CMD_END;
 		nt.status = ret;
 		call_notify(nt);
 		if (ret)
@@ -505,12 +507,12 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 	if (p == nullptr)
 		return -1;
 
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_TOTAL;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_TOTAL;
 	nt.total = 1;
 	call_notify(nt);
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_START;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_START;
 	nt.str = (char *)p->get_cmd().c_str();
 	call_notify(nt);
 
@@ -551,7 +553,7 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 		return ret = dry? p->dump() : p->run(nullptr);
 	}
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_END;
+	nt.type = Notification::NOTIFCTN_TYPE::CMD_END;
 	nt.status = ret;
 	call_notify(nt);
 
@@ -560,8 +562,8 @@ int run_cmd(CmdCtx *pCtx, const char * cmd, int dry)
 
 int CmdDone::run(CmdCtx *)
 {
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::DONE;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::DONE;
 	call_notify(nt);
 	return 0;
 }
@@ -650,8 +652,8 @@ int CmdShell::run(CmdCtx*pCtx)
 
 			return run_cmd(pCtx, cmd.c_str(), 0);
 		}
-		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
+		Notification nt;
+		nt.type = Notification::NOTIFCTN_TYPE::CMD_INFO;
 		nt.str = (char*)str.c_str();
 		call_notify(nt);
 	}
@@ -968,11 +970,11 @@ int uuu_auto_detect_file(const char *filename)
 	return added_default_boot_cmd(fn.c_str());
 }
 
-int notify_done(uuu_notify nt, void *p)
+int notify_done(Notification nt, void *p)
 {
-	if(nt.type == uuu_notify::NOTIFCTN_TYPE::DONE)
+	if(nt.type == Notification::NOTIFCTN_TYPE::DONE)
 		*(std::atomic<int> *) p = 1;
-	if (nt.type == uuu_notify::NOTIFCTN_TYPE::CMD_END && nt.status)
+	if (nt.type == Notification::NOTIFCTN_TYPE::CMD_END && nt.status)
 		*(std::atomic<int> *) p = 1;
 
 	return 0;
@@ -994,7 +996,9 @@ int uuu_wait_uuu_finish(int deamon, int dry)
 	}
 
 	if (!deamon)
-		uuu_register_notify_callback(notify_done, &exit);
+	{
+		register_notify_callback(notify_done, &exit);
+	}
 
 	if(polling_usb(exit))
 		return -1;

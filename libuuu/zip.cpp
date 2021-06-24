@@ -40,6 +40,8 @@
 
 #define CHUNK 0x10000
 
+using namespace uuu;
+
 int Zip::BuildDirInfo()
 {
 	shared_ptr<FileBuffer> zipfile = get_file_buffer(m_filename);
@@ -199,8 +201,8 @@ int Zip::get_file_buff(string filename, shared_ptr<FileBuffer> p)
 		return -1;
 	}
 
-	uuu_notify ut;
-	ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_START;
+	Notification ut;
+	ut.type = Notification::NOTIFCTN_TYPE::DECOMPRESS_START;
 	ut.str = (char*)filename.c_str();
 	call_notify(ut);
 
@@ -229,8 +231,8 @@ int	Zip_file_Info::decompress(Zip *pZip, shared_ptr<FileBuffer>p)
 	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_KNOWN_SIZE);
 	p->m_request_cv.notify_all();
 	
-	uuu_notify ut;
-	ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_SIZE;
+	Notification ut;
+	ut.type = Notification::NOTIFCTN_TYPE::DECOMPRESS_SIZE;
 	ut.total = m_filesize;
 	call_notify(ut);
 	size_t lastpos = 0;
@@ -301,8 +303,8 @@ int	Zip_file_Info::decompress(Zip *pZip, shared_ptr<FileBuffer>p)
 
 		if (pos - lastpos > 100 * 1024 * 1024)
 		{
-			uuu_notify ut;
-			ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS;
+			Notification ut;
+			ut.type = Notification::NOTIFCTN_TYPE::DECOMPRESS_POS;
 			ut.index = pos;
 			call_notify(ut);
 			lastpos = pos;
@@ -323,7 +325,7 @@ int	Zip_file_Info::decompress(Zip *pZip, shared_ptr<FileBuffer>p)
 	atomic_fetch_or(&p->m_dataflags, FILEBUFFER_FLAG_LOADED);
 	p->m_request_cv.notify_all();
 
-	ut.type = uuu_notify::NOTIFCTN_TYPE::DECOMPRESS_POS;
+	ut.type = Notification::NOTIFCTN_TYPE::DECOMPRESS_POS;
 	ut.index = m_filesize;
 	call_notify(ut);
 

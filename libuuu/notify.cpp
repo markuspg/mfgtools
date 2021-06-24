@@ -39,6 +39,7 @@
 #include <thread>
 
 using namespace std;
+using namespace uuu;
 
 static map<uuu_notify_fun, void*> g_notification_map;
 static mutex g_mutex_notify;
@@ -53,7 +54,7 @@ static const time_point<steady_clock> g_now = steady_clock::now();
  * @param[in] data Pointer to data which shall be passed to the callback method
  * @return `0` if the callback function got registered, `1` if it already is
  */
-int uuu_register_notify_callback(uuu_notify_fun f, void *data)
+int uuu::register_notify_callback(uuu_notify_fun f, void *data)
 {
 	std::lock_guard<mutex> lock(g_mutex_notify);
 
@@ -66,7 +67,7 @@ int uuu_register_notify_callback(uuu_notify_fun f, void *data)
  * anymore
  * @return `0` if it got removed, `1` otherwise
  */
-int uuu_unregister_notify_callback(uuu_notify_fun f)
+int uuu::unregister_notify_callback(uuu_notify_fun f)
 {
 	std::lock_guard<mutex> lock(g_mutex_notify);
 
@@ -77,7 +78,7 @@ int uuu_unregister_notify_callback(uuu_notify_fun f)
  * @brief Submit a notification to all registered callbacks
  * @param[in] nf The notification which shall be submitted to the callbacks
  */
-void call_notify(struct uuu_notify nf)
+void uuu::call_notify(Notification nf)
 {
 	//Change RW lock later;
 	std::lock_guard<mutex> lock(g_mutex_notify);

@@ -49,6 +49,8 @@
 #include "libcomm.h"
 #include "trans.h"
 
+using namespace uuu;
+
 int FastBoot::Transport(string cmd, void *p, size_t size, vector<uint8_t> *input)
 {
 	if (m_pTrans->write((void*)cmd.data(), cmd.size()))
@@ -90,8 +92,8 @@ int FastBoot::Transport(string cmd, void *p, size_t size, vector<uint8_t> *input
 			string s;
 			s = buff + 4;
 			m_info += s;
-			uuu_notify nt;
-			nt.type = uuu_notify::NOTIFCTN_TYPE::CMD_INFO;
+			Notification nt;
+			nt.type = Notification::NOTIFCTN_TYPE::CMD_INFO;
 			nt.str = buff + 4;
 			call_notify(nt);
 		}
@@ -344,8 +346,8 @@ int FBCopy::run(CmdCtx *ctx)
 			}
 		}
 
-		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+		Notification nt;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 		nt.total = buff->size();
 		call_notify(nt);
 
@@ -370,12 +372,12 @@ int FBCopy::run(CmdCtx *ctx)
 				return -1;
 			}
 
-			nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+			nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 			nt.index = i;
 			call_notify(nt);
 		}
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 		nt.index = buff->size();
 		call_notify(nt);
 	}
@@ -385,8 +387,8 @@ int FBCopy::run(CmdCtx *ctx)
 		if (fb.Transport(cmd, nullptr, 0))
 			return -1;
 
-		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+		Notification nt;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 		size_t total = nt.total = strtoul(fb.m_info.c_str(), nullptr, 16);
 		call_notify(nt);
 
@@ -426,7 +428,7 @@ int FBCopy::run(CmdCtx *ctx)
 
 			of.write((const char*)data.data(), data.size());
 
-			nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+			nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 			nt.index += data.size();
 			call_notify(nt);
 
@@ -435,7 +437,7 @@ int FBCopy::run(CmdCtx *ctx)
 
 		} while (nt.index < total ||  total == 0 ); // If total is 0, it is stream
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 		call_notify(nt);
 	}
 
@@ -518,10 +520,10 @@ int FBFlashCmd::flash_raw2sparse(FastBoot *fb, shared_ptr<FileBuffer> pdata, siz
 
 	data.resize(block_size);
 
-	uuu_notify nt;
+	Notification nt;
 	bool bload = pdata->IsKnownSize();
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+	nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 	if (bload)
 		nt.total = pdata->size();
 	else
@@ -550,7 +552,7 @@ int FBFlashCmd::flash_raw2sparse(FastBoot *fb, shared_ptr<FileBuffer> pdata, siz
 
 			sf.push_one_chuck(&ct, nullptr);
 
-			nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+			nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 			nt.total = i * block_size;
 			call_notify(nt);
 		}
@@ -559,7 +561,7 @@ int FBFlashCmd::flash_raw2sparse(FastBoot *fb, shared_ptr<FileBuffer> pdata, siz
 
 		if (bload != pdata->IsKnownSize())
 		{
-			nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+			nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 			nt.total = pdata->size();
 			call_notify(nt);
 
@@ -573,11 +575,11 @@ int FBFlashCmd::flash_raw2sparse(FastBoot *fb, shared_ptr<FileBuffer> pdata, siz
 	if (flash(fb, sf.m_data.data(), sf.m_data.size()))
 		return -1;
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+	nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 	nt.total = pdata->size();
 	call_notify(nt);
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+	nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 	nt.total = pdata->size();
 	call_notify(nt);
 
@@ -671,8 +673,8 @@ int FBFlashCmd::run(CmdCtx *ctx)
 		size_t startblock;
 		chunk_header_t * pheader;
 
-		uuu_notify nt;
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+		Notification nt;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 		nt.total = pfile->total_blks;
 		call_notify(nt);
 
@@ -714,8 +716,8 @@ int FBFlashCmd::run(CmdCtx *ctx)
 				pos = oldpos;
 				nblk--;
 
-				uuu_notify nt;
-				nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+				Notification nt;
+				nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 				nt.total = startblock;
 				call_notify(nt);
 			}
@@ -743,8 +745,8 @@ int FBFlashCmd::run(CmdCtx *ctx)
 					off += sz;
 					startblock += sz / pfile->blk_sz;
 
-					uuu_notify nt;
-					nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+					Notification nt;
+					nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 					nt.total = startblock;
 					call_notify(nt);
 
@@ -757,7 +759,7 @@ int FBFlashCmd::run(CmdCtx *ctx)
 			return -1;
 
 		sparse_header * pf = (sparse_header *)sf.m_data.data();
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 		nt.total = startblock + pf->total_blks;
 		call_notify(nt);
 	}
@@ -838,8 +840,8 @@ int FBFlashCmd::flash_ffu(FastBoot *fb, shared_ptr<FileBuffer> p)
 	size_t block_off = off + pIs->dwWriteDescriptorLength;
 	block_off = round_up(block_off, (size_t)h->dwChunkSizeInKb * 1024);
 
-	uuu_notify nt;
-	nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_SIZE;
+	Notification nt;
+	nt.type = Notification::NOTIFCTN_TYPE::TRANS_SIZE;
 	nt.total = pIs->dwWriteDescriptorCount;
 	call_notify(nt);
 
@@ -879,14 +881,14 @@ int FBFlashCmd::flash_ffu(FastBoot *fb, shared_ptr<FileBuffer> p)
 			}
 		}
 
-		nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+		nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 		nt.total = i;
 		call_notify(nt);
 
 		currrent_block += entry->dwBlockCount;
 	}
 
-	nt.type = uuu_notify::NOTIFCTN_TYPE::TRANS_POS;
+	nt.type = Notification::NOTIFCTN_TYPE::TRANS_POS;
 	nt.total = i;
 	call_notify(nt);
 
