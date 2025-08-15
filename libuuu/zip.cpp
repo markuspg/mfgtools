@@ -187,7 +187,7 @@ bool Zip::check_file_exist(const string &filename)
 	return true;
 }
 
-int Zip::get_file_buff(string filename, shared_ptr<FileBuffer> p)
+int Zip::get_file_buff(const string &filename, shared_ptr<FileBuffer> p)
 {
 	if (m_filemap.find(filename) == m_filemap.end())
 	{
