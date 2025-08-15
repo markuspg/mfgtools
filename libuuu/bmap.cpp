@@ -143,11 +143,9 @@ int load_bmap(const std::string& filename, bmap_t& bmap)
 		return -1;
 	}
 
-	if (elem) {
-		if (!elem->Attribute("version", "2.0")) {
-			set_last_err_string("Invalid bmap version. 2.0 is expected.");
-			return -1;
-		}
+	if (!elem->Attribute("version", "2.0")) {
+		set_last_err_string("Invalid bmap version. 2.0 is expected.");
+		return -1;
 	}
 
 	for (auto ch = elem->FirstChildElement(); ch != nullptr; ch = ch->NextSiblingElement()) {

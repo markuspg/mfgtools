@@ -1087,9 +1087,6 @@ int FSCompressStream::Decompress(const string& backfile, shared_ptr<FileBuffer>o
 
 	while ((buff = inp->request_data(offset, cs->get_default_input_size())))
 	{
-		if (!buff)
-			return -1;
-
 		//ZSTD_inBuffer input = { buff->data(), buff->size(), 0 };
 		cs->set_input_buff(buff->data(), buff->size());
 		/* Given a valid frame, zstd won't consume the last byte of the frame
@@ -1915,9 +1912,6 @@ int FSCompressStream::load(const string& backfile, const string& filename, share
 
 		while ((p = ScanCompressblock(backfile, offset, decompress_off)))
 		{
-			if (!p)
-				return 0;
-
 			{
 				lock_guard<mutex> lock(outp->m_seg_map_mutex);
 				outp->m_seg_map[p->m_output_offset] = p;
