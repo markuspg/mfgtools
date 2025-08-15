@@ -1240,26 +1240,12 @@ shared_ptr<FileBuffer> get_file_buffer(string filename, bool async)
 	}
 }
 
-FileBuffer::FileBuffer()
+FileBuffer::FileBuffer(void *p, size_t sz) :
+	m_pDatabuffer{(uint8_t*)malloc(sz)},
+	m_DataSize{sz},
+	m_MemSize{sz}
 {
-	m_pDatabuffer = nullptr;
-	m_DataSize = 0;
-	m_MemSize = 0;
-	m_dataflags = 0;
-	m_available_size = 0;
-}
-
-FileBuffer::FileBuffer(void *p, size_t sz)
-{
-	m_pDatabuffer = nullptr;
-	m_DataSize = 0;
-	m_MemSize = 0;
-
-	m_pDatabuffer = (uint8_t*)malloc(sz);
-	m_MemSize = m_DataSize = sz;
-
 	memcpy(m_pDatabuffer, p, sz);
-	m_dataflags = 0;
 
 	atomic_fetch_or(&m_dataflags, FILEBUFFER_FLAG_LOADED);
 }

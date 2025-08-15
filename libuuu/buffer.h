@@ -186,9 +186,9 @@ public:
 
 	std::mutex m_data_mutex;
 
-	uint8_t *m_pDatabuffer;
-	size_t m_DataSize;
-	size_t m_MemSize;
+	uint8_t *m_pDatabuffer = nullptr;
+	size_t m_DataSize = 0;
+	size_t m_MemSize = 0;
 
 	std::shared_ptr<FileBuffer> m_ref;
 
@@ -240,11 +240,11 @@ public:
 	}
 	void truncate_old_data_in_pool();
 
-	std::atomic_int m_dataflags;
+	std::atomic_int m_dataflags{0};
 
 	std::thread m_async_thread;
 
-	std::atomic_size_t m_available_size;
+	std::atomic_size_t m_available_size{0};
 	std::condition_variable m_request_cv;
 	std::mutex m_request_cv_mutex;
 
@@ -258,7 +258,7 @@ public:
 
 	uint64_t m_timesample;
 
-	FileBuffer();
+	FileBuffer() = default;
 	FileBuffer(void*p, size_t sz);
 	~FileBuffer();
 
